@@ -42,22 +42,27 @@ public class AntlrTokenCollector extends SyntaxHighlighter {
 
   @Override
   public List<HighlightRegion> collectMatches(String text) {
-
+      // Indicators for previously read '@' for annotations
       boolean previousWasAnnot = false;
-
+      int atStart=0;
+      // create HighlightRegionList to return
       List<HighlightRegion> regionList = new ArrayList<>();
-
+      // tokenizing the input stream
       var input = CharStreams.fromString(text);
       var lexer = new MiniJavaLexer(input);
       var tokens = new CommonTokenStream(lexer);
-
+      // fill tokens with token stream
       tokens.fill();
 
       for (var t : tokens.getTokens()) {
+          // ignore EOF
+          if(t.getType() == MiniJavaLexer.EOF) continue;
+          // start and end index of recognized tokens
           int start = t.getStartIndex();
           int end = t.getStopIndex()+1;
-
+          // actual highlighting of tokens
           switch(t.getType()){
+              // keywords
               case MiniJavaLexer.PACKAGE:
               case MiniJavaLexer.IMPORT:
               case MiniJavaLexer.CLASS:
@@ -75,18 +80,22 @@ public class AntlrTokenCollector extends SyntaxHighlighter {
                   HighlightRegion keywordRegion = new HighlightRegion(start, end, MiniJavaColours.KEYWORD_COLOUR);
                   regionList.add(keywordRegion);
                   break;
+              // annotation start
               case MiniJavaLexer.AT:
                   /*HighlightRegion annotRegion = new HighlightRegion(start, end, MiniJavaColours.ANNOTATION_COLOUR);
                   regionList.add(annotRegion);*/
+                  atStart = start;
                   previousWasAnnot = true;
                   break;
+              // real annotation
               case MiniJavaLexer.IDENTIFIER:
                   if(previousWasAnnot){
-                      HighlightRegion overRegion = new HighlightRegion(start-1, end, MiniJavaColours.ANNOTATION_COLOUR);
+                      HighlightRegion overRegion = new HighlightRegion(atStart, end, MiniJavaColours.ANNOTATION_COLOUR);
                       regionList.add(overRegion);
                       previousWasAnnot = false;
                   }
                   break;
+              // literals
               case MiniJavaLexer.STRING_LITERAL:
                   HighlightRegion stringRegion = new HighlightRegion(start, end, MiniJavaColours.STRING_LITERAL_COLOUR);
                   regionList.add(stringRegion);
@@ -95,6 +104,7 @@ public class AntlrTokenCollector extends SyntaxHighlighter {
                   HighlightRegion charRegion = new HighlightRegion(start, end, MiniJavaColours.CHAR_LITERAL_COLOUR);
                   regionList.add(charRegion);
                   break;
+              // comments
               case MiniJavaLexer.LINE_COMMENT:
                   HighlightRegion lineComRegion = new HighlightRegion(start,end, MiniJavaColours.LINE_COMMENT_COLOUR);
                   regionList.add(lineComRegion);
@@ -107,17 +117,12 @@ public class AntlrTokenCollector extends SyntaxHighlighter {
                   HighlightRegion docComRegion = new HighlightRegion(start, end, MiniJavaColours.JAVADOC_COMMENT_COLOUR);
                   regionList.add(docComRegion);
                   break;
+              // default case -> resets annotation indicators
+              default:
+                  previousWasAnnot = false;
+                  break;
           }
-          /*var tokenName = MiniJavaLexer.VOCABULARY.getSymbolicName(t.getType());
-          System.out.printf(
-              "%-10s line=%d col=%d text='%s'%n",
-              tokenName, t.getLine(), t.getCharPositionInLine(), t.getText());*/
       }
-
-
-
       return regionList;
-
-    //throw new UnsupportedOperationException(tokens.getText());
   }
 }
