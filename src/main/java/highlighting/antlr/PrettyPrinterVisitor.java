@@ -48,6 +48,8 @@ public final class PrettyPrinterVisitor extends MiniJavaBaseVisitor<Void> {
     // - import declarations (one per line),
     // - type declarations (one after another),
     // with sensible blank lines between these parts.
+
+    visitChildren(ctx);
     return null;
   }
 
@@ -58,6 +60,18 @@ public final class PrettyPrinterVisitor extends MiniJavaBaseVisitor<Void> {
     // - opening and closing brace,
     // - one member declaration per line,
     // - members indented relative to the class.
+
+    writeln("{");
+    //nl();
+    currentIndent++;
+    for (var decl : ctx.classBodyDeclaration()) {
+        visit(decl);
+        nl();
+    }
+    currentIndent--;
+    writeln("}");
+    //nl();
+
     return null;
   }
 
@@ -68,6 +82,16 @@ public final class PrettyPrinterVisitor extends MiniJavaBaseVisitor<Void> {
     // - opening and closing brace,
     // - one blockStatement per line,
     // - nested blocks indented further.
+    writeln("{");
+    //nl();
+    currentIndent++;
+    for(var body : ctx.blockStatement()){
+        visit(body);
+        nl();
+    }
+    currentIndent--;
+    write("}");
+    //nl();
     return null;
   }
 
@@ -76,6 +100,19 @@ public final class PrettyPrinterVisitor extends MiniJavaBaseVisitor<Void> {
     // TODO:
     // Ensure that each statement (if/while/return/block/...) ends up
     // on exactly one line, with proper indentation for nested statements.
+
+    if (ctx.ELSE() != null) {
+        visit(ctx.IF());
+        visit(ctx.LPAREN());
+        visit(ctx.expression());
+        visit(ctx.RPAREN());
+        visit(ctx.statement(0));  // if-Block
+        nl();                      // Zeilenumbruch vor else
+        visit(ctx.ELSE());
+        visit(ctx.statement(1));  // else-Block
+    } else {
+        visitChildren(ctx);
+    }
     return null;
   }
 
