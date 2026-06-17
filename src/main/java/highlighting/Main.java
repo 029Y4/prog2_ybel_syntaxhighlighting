@@ -48,7 +48,7 @@ public class Main {
     System.out.println("\n--- Pretty Printed ---\n" + result);
 
       var printer2 = new PrettyPrinterVisitor(indentWidth);
-      var testput = CharStreams.fromString("public class Bar{ public int foo() { while(x==y) x=x+y; return null; } } ");
+      var testput = CharStreams.fromString("package controller; import com.badlogic.gdx.Game; import com.badlogic.gdx.graphics.g2d.SpriteBatch; public class Bar{ public int foo() { while(x==y) x=x+y; return null; } } ");
       var lexer2 = new MiniJavaLexer(testput);
       var tokens2 = new CommonTokenStream(lexer2);
       var parser2 = new MiniJavaParser(tokens2);
