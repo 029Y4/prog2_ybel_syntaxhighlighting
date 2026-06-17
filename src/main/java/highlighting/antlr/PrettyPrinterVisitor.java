@@ -49,7 +49,26 @@ public final class PrettyPrinterVisitor extends MiniJavaBaseVisitor<Void> {
     // - type declarations (one after another),
     // with sensible blank lines between these parts.
 
-    visitChildren(ctx);
+      if(ctx.packageDecl() != null){
+          visit(ctx.packageDecl());
+          nl();
+          nl();
+      }
+
+      for(var impDec : ctx.importDecl()) {
+          visit(impDec);
+          nl();
+      }
+      if(ctx.importDecl() == null)
+          nl();
+      nl();
+
+      for(var typeDec : ctx.typeDecl()) {
+          visit(typeDec);
+          nl();
+      }
+
+    //visitChildren(ctx);
     return null;
   }
 
