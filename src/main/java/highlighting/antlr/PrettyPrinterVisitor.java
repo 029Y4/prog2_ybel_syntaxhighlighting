@@ -55,20 +55,18 @@ public final class PrettyPrinterVisitor extends MiniJavaBaseVisitor<Void> {
           nl();
       }
 
-      for(var impDec : ctx.importDecl()) {
-          visit(impDec);
+      for(var impDecl : ctx.importDecl()) {
+          visit(impDecl);
           nl();
       }
-      if(ctx.importDecl() == null)
-          nl();
+
       nl();
 
-      for(var typeDec : ctx.typeDecl()) {
-          visit(typeDec);
+      for(var typeDecl : ctx.typeDecl()) {
+          visit(typeDecl);
           nl();
       }
 
-    //visitChildren(ctx);
     return null;
   }
 
@@ -81,15 +79,17 @@ public final class PrettyPrinterVisitor extends MiniJavaBaseVisitor<Void> {
     // - members indented relative to the class.
 
     writeln("{");
-    //nl();
     currentIndent++;
-    for (var decl : ctx.classBodyDeclaration()) {
-        visit(decl);
+
+    for (var memberDec : ctx.classBodyDeclaration()) {
+        // empty statement
+        if(memberDec.getText().equals(";")) writeln(";");
+        // other statements
+        visit(memberDec);
         nl();
     }
     currentIndent--;
     writeln("}");
-    //nl();
 
     return null;
   }
@@ -102,15 +102,16 @@ public final class PrettyPrinterVisitor extends MiniJavaBaseVisitor<Void> {
     // - one blockStatement per line,
     // - nested blocks indented further.
     writeln("{");
-    //nl();
+
     currentIndent++;
     for(var body : ctx.blockStatement()){
         visit(body);
         nl();
     }
+
     currentIndent--;
     write("}");
-    //nl();
+
     return null;
   }
 
@@ -130,6 +131,7 @@ public final class PrettyPrinterVisitor extends MiniJavaBaseVisitor<Void> {
         visit(ctx.ELSE());
         visit(ctx.statement(1));  // else-Block
     } else {
+        // other statements
         visitChildren(ctx);
     }
     return null;
